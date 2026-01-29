@@ -1,3 +1,5 @@
+"use client"; // <--- MUST BE LINE 1
+
 import Image from "next/image";
 
 const slides = [
