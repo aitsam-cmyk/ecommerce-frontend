@@ -2,7 +2,9 @@
 import { useState } from "react";
 
 export default function CheckoutPage() {
-  const [items, setItems] = useState<any[]>([]);
+  const [items, setItems] = useState<any[]>([
+    { productId: "demo1", title: "Modern Hoodie", price: 4999, quantity: 1, imageUrl: "https://dummyimage.com/120x120/eee/aaa.jpg&text=Hoodie" }
+  ]);
   const [paymentMethod, setPaymentMethod] = useState("cod");
   const [shippingAddress, setShippingAddress] = useState("");
   const [email, setEmail] = useState("");
@@ -29,26 +31,63 @@ export default function CheckoutPage() {
     }
   }
 
+  const subtotal = items.reduce((s, it) => s + Number(it.price) * Number(it.quantity), 0);
+  const tax = 0;
+  const shipping = 0;
+  const codFee = paymentMethod === "cod" ? 100 : 0;
+  const walletDiscount = paymentMethod === "easypaisa" || paymentMethod === "jazzcash" ? Math.round(subtotal * 0.05) : 0;
+  const total = subtotal + tax + shipping + codFee - walletDiscount;
+
   return (
-    <div className="mx-auto max-w-3xl px-4 py-10 space-y-6">
-      <h1 className="font-serif text-2xl">Checkout</h1>
-      <div className="grid gap-3 sm:grid-cols-2">
-        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Full name" className="rounded-md border border-zinc-300 px-3 py-2 text-sm" />
-        <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email (optional)" className="rounded-md border border-zinc-300 px-3 py-2 text-sm" />
-        <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone" className="rounded-md border border-zinc-300 px-3 py-2 text-sm" />
-        <input value={shippingAddress} onChange={(e) => setShippingAddress(e.target.value)} placeholder="Shipping address" className="rounded-md border border-zinc-300 px-3 py-2 text-sm sm:col-span-2" />
+    <div className="mx-auto max-w-7xl px-4 py-10">
+      <h1 className="font-serif text-2xl mb-6">Checkout</h1>
+      <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
+        <div className="space-y-6">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Full name" className="rounded-md border border-zinc-300 px-3 py-2 text-sm" />
+            <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email (optional)" className="rounded-md border border-zinc-300 px-3 py-2 text-sm" />
+            <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone" className="rounded-md border border-zinc-300 px-3 py-2 text-sm" />
+            <input value={shippingAddress} onChange={(e) => setShippingAddress(e.target.value)} placeholder="Shipping address" className="rounded-md border border-zinc-300 px-3 py-2 text-sm sm:col-span-2" />
+          </div>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)} className="rounded-md border border-zinc-300 px-3 py-2 text-sm">
+              <option value="easypaisa">Easypaisa</option>
+              <option value="jazzcash">JazzCash</option>
+              <option value="bank_transfer">Bank Transfer</option>
+              <option value="cod">Cash on Delivery</option>
+            </select>
+            <input value={reference} onChange={(e) => setReference(e.target.value)} placeholder="Payment reference (optional)" className="rounded-md border border-zinc-300 px-3 py-2 text-sm sm:col-span-2" />
+          </div>
+          <button onClick={placeOrder} className="rounded-md bg-emerald-600 px-4 py-2 text-white transition hover:scale-[1.02]">Place order</button>
+          <p className="text-xs text-zinc-500">Guest checkout is supported. You can create an account later.</p>
+        </div>
+        <aside className="sticky top-20 h-fit rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
+          <h2 className="mb-3 text-lg font-semibold">Order Summary</h2>
+          <div className="space-y-3">
+            {items.map((it: any, i: number) => (
+              <div key={i} className="flex items-center gap-3">
+                <img src={it.imageUrl} alt={it.title} className="h-12 w-12 rounded object-cover" />
+                <div className="flex-1">
+                  <div className="text-sm font-medium line-clamp-1">{it.title}</div>
+                  <div className="text-xs text-zinc-600">Qty {it.quantity}</div>
+                </div>
+                <div className="text-sm font-semibold">Rs {it.price}</div>
+              </div>
+            ))}
+            <div className="pt-2 space-y-1 text-sm">
+              <div className="flex justify-between"><span>Subtotal</span><span>Rs {subtotal}</span></div>
+              <div className="flex justify-between"><span>Shipping</span><span>Rs {shipping}</span></div>
+              <div className="flex justify-between"><span>Tax</span><span>Rs {tax}</span></div>
+              {walletDiscount > 0 && <div className="flex justify-between text-emerald-700"><span>Wallet Discount</span><span>- Rs {walletDiscount}</span></div>}
+              {codFee > 0 && <div className="flex justify-between text-zinc-700"><span>COD Fee</span><span>Rs {codFee}</span></div>}
+              <div className="flex justify-between pt-2 text-base font-bold"><span>Total</span><span>Rs {total}</span></div>
+              <div className="mt-3 text-xs text-zinc-500">Secure Checkout • SSL Encrypted • Money Back Guarantee</div>
+              <button onClick={placeOrder} className="mt-3 w-full rounded-md bg-emerald-600 px-4 py-2 text-white">Pay Now</button>
+              <button className="mt-2 w-full text-xs text-zinc-600">Have a discount code?</button>
+            </div>
+          </div>
+        </aside>
       </div>
-      <div className="grid gap-3 sm:grid-cols-3">
-        <select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)} className="rounded-md border border-zinc-300 px-3 py-2 text-sm">
-          <option value="easypaisa">Easypaisa</option>
-          <option value="jazzcash">JazzCash</option>
-          <option value="bank_transfer">Bank Transfer</option>
-          <option value="cod">Cash on Delivery</option>
-        </select>
-        <input value={reference} onChange={(e) => setReference(e.target.value)} placeholder="Payment reference (optional)" className="rounded-md border border-zinc-300 px-3 py-2 text-sm sm:col-span-2" />
-      </div>
-      <button onClick={placeOrder} className="rounded-md bg-zinc-900 px-4 py-2 text-white transition hover:scale-[1.02]">Place order</button>
-      <p className="text-xs text-zinc-500">Guest checkout is supported. You can create an account later.</p>
     </div>
   );
 }
