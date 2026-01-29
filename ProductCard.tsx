@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Product } from "../types/product";
+import { Product } from "./src/types/product";
 
 export default function ProductCard({ product }: { product: Product }) {
   return (
