@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 
 async function getProduct(id: string) {
   const base = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
@@ -24,16 +25,29 @@ export default async function ProductPage({ params }: { params: { id: string } }
   if (!p) {
     return <div className="mx-auto max-w-3xl px-4 py-10">Product not found</div>;
   }
+  const images: string[] = Array.isArray((p as any).images) && (p as any).images.length > 0 ? (p as any).images : [p.imageUrl];
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 grid gap-8 md:grid-cols-2">
-      <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-zinc-100">
-        <Image src={p.imageUrl} alt={p.title} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
+      <div>
+        <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-zinc-100">
+          <Image src={images[0]} alt={p.title} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover transition-transform duration-300 hover:scale-[1.02]" />
+        </div>
+        <div className="mt-3 flex gap-2">
+          {images.map((src, i) => (
+            <div key={i} className="relative h-16 w-16 overflow-hidden rounded-md border border-zinc-200">
+              <Image src={src} alt={`${p.title} ${i + 1}`} fill sizes="64px" className="object-cover" />
+            </div>
+          ))}
+        </div>
       </div>
       <div className="space-y-4">
         <h1 className="font-serif text-2xl">{p.title}</h1>
         <p className="text-zinc-600">{p.description}</p>
         <div className="text-2xl font-semibold">${Number(p.price).toFixed(2)}</div>
-        <button className="rounded-md bg-zinc-900 px-4 py-2 text-white transition hover:scale-[1.02]">Add to cart</button>
+        <div className="flex gap-2">
+          <button className="rounded-md bg-zinc-900 px-4 py-2 text-white transition hover:scale-[1.02]">Add to cart</button>
+          <Link href="/products" className="rounded-md border border-zinc-300 px-4 py-2 text-zinc-700 transition hover:bg-zinc-100">Back to products</Link>
+        </div>
       </div>
     </div>
   );

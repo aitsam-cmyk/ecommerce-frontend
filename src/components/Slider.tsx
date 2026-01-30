@@ -35,18 +35,21 @@ export default function Slider() {
 
   return (
     <div className="relative overflow-hidden rounded-2xl">
-      <div className="flex transition-transform duration-700" style={{ transform: `translateX(-${index * 100}%)` }}>
+      <div className="flex transition-transform duration-700 ease-out" style={{ transform: `translateX(-${index * 100}%)` }}>
         {slides.map((s, i) => (
           <div key={i} className="min-w-full">
             <Image src={s.src} alt={s.alt} width={1200} height={500} className="h-64 w-full object-cover" />
+            <div className="absolute inset-0 flex items-end justify-start p-6">
+              <a href="/products" className="rounded-full bg-black/70 px-4 py-2 text-sm text-white backdrop-blur transition hover:bg-black">Shop Now</a>
+            </div>
           </div>
         ))}
       </div>
       <div className="absolute inset-y-0 left-0 flex items-center">
-        <button onClick={prev} className="m-2 rounded-full bg-black/30 px-3 py-2 text-white">‹</button>
+        <button onClick={prev} className="m-2 rounded-full bg-black/30 px-3 py-2 text-white transition hover:bg-black/50">‹</button>
       </div>
       <div className="absolute inset-y-0 right-0 flex items-center">
-        <button onClick={next} className="m-2 rounded-full bg-black/30 px-3 py-2 text-white">›</button>
+        <button onClick={next} className="m-2 rounded-full bg-black/30 px-3 py-2 text-white transition hover:bg-black/50">›</button>
       </div>
     </div>
   );
