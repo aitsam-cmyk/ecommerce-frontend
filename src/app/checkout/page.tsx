@@ -1,46 +1,31 @@
 "use client";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function CheckoutPage() {
   const [items, setItems] = useState<any[]>([
     { productId: "demo1", title: "Modern Hoodie", price: 4999, quantity: 1, imageUrl: "https://dummyimage.com/120x120/eee/aaa.jpg&text=Hoodie" }
   ]);
-  const [paymentMethod, setPaymentMethod] = useState("cod");
   const [shippingAddress, setShippingAddress] = useState("");
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [reference, setReference] = useState("");
+  const router = useRouter();
 
-  async function placeOrder() {
-    const base = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-    const res = await fetch(`${base}/api/orders/guest`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        items,
-        paymentMethod,
-        shippingAddress,
-        paymentInfo: { reference, payerName: name, payerPhone: phone }
-      })
-    });
-    if (res.ok) {
-      alert("Order placed");
-    } else {
-      alert("Failed to place order");
-    }
+  function proceedToPayment() {
+    const draft = { items, shippingAddress, email, name, phone };
+    sessionStorage.setItem("checkoutDraft", JSON.stringify(draft));
+    router.push("/checkout/payment");
   }
 
   const subtotal = items.reduce((s, it) => s + Number(it.price) * Number(it.quantity), 0);
   const tax = 0;
   const shipping = 0;
-  const codFee = paymentMethod === "cod" ? 100 : 0;
-  const walletDiscount = paymentMethod === "easypaisa" || paymentMethod === "jazzcash" ? Math.round(subtotal * 0.05) : 0;
-  const total = subtotal + tax + shipping + codFee - walletDiscount;
+  const total = subtotal + tax + shipping;
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10">
-      <h1 className="font-serif text-2xl mb-6">Checkout</h1>
+      <h1 className="font-serif text-2xl mb-6">Shipping & Billing</h1>
       <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
         <div className="space-y-6">
           <div className="grid gap-3 sm:grid-cols-2">
@@ -49,17 +34,8 @@ export default function CheckoutPage() {
             <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone" className="rounded-md border border-zinc-300 px-3 py-2 text-sm" />
             <input value={shippingAddress} onChange={(e) => setShippingAddress(e.target.value)} placeholder="Shipping address" className="rounded-md border border-zinc-300 px-3 py-2 text-sm sm:col-span-2" />
           </div>
-          <div className="grid gap-3 sm:grid-cols-3">
-            <select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)} className="rounded-md border border-zinc-300 px-3 py-2 text-sm">
-              <option value="easypaisa">Easypaisa</option>
-              <option value="jazzcash">JazzCash</option>
-              <option value="bank_transfer">Bank Transfer</option>
-              <option value="cod">Cash on Delivery</option>
-            </select>
-            <input value={reference} onChange={(e) => setReference(e.target.value)} placeholder="Payment reference (optional)" className="rounded-md border border-zinc-300 px-3 py-2 text-sm sm:col-span-2" />
-          </div>
-          <button onClick={placeOrder} className="rounded-md bg-emerald-600 px-4 py-2 text-white transition hover:scale-[1.02]">Place order</button>
-          <p className="text-xs text-zinc-500">Guest checkout is supported. You can create an account later.</p>
+          <button onClick={proceedToPayment} className="rounded-md bg-emerald-600 px-4 py-2 text-white transition hover:scale-[1.02]">Proceed to Pay</button>
+          <p className="text-xs text-zinc-500">Guest checkout supported. Payment method will be selected on next step.</p>
         </div>
         <aside className="sticky top-20 h-fit rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
           <h2 className="mb-3 text-lg font-semibold">Order Summary</h2>
@@ -78,11 +54,9 @@ export default function CheckoutPage() {
               <div className="flex justify-between"><span>Subtotal</span><span>Rs {subtotal}</span></div>
               <div className="flex justify-between"><span>Shipping</span><span>Rs {shipping}</span></div>
               <div className="flex justify-between"><span>Tax</span><span>Rs {tax}</span></div>
-              {walletDiscount > 0 && <div className="flex justify-between text-emerald-700"><span>Wallet Discount</span><span>- Rs {walletDiscount}</span></div>}
-              {codFee > 0 && <div className="flex justify-between text-zinc-700"><span>COD Fee</span><span>Rs {codFee}</span></div>}
               <div className="flex justify-between pt-2 text-base font-bold"><span>Total</span><span>Rs {total}</span></div>
               <div className="mt-3 text-xs text-zinc-500">Secure Checkout • SSL Encrypted • Money Back Guarantee</div>
-              <button onClick={placeOrder} className="mt-3 w-full rounded-md bg-emerald-600 px-4 py-2 text-white">Pay Now</button>
+              <button onClick={proceedToPayment} className="mt-3 w-full rounded-md bg-emerald-600 px-4 py-2 text-white">Proceed to Pay</button>
               <button className="mt-2 w-full text-xs text-zinc-600">Have a discount code?</button>
             </div>
           </div>
